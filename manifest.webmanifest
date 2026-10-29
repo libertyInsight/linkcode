@@ -1,7 +1,7 @@
 {
   "name": "링크코드",
   "short_name": "링크코드",
-  "description": "긴 링크를 6자리 코드로 바꿔 전자칠판에서 바로 열기",
+  "description": "긴 링크나 파일을 6자리 코드로 바꿔 전자칠판에서 바로 열기",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f4f1ea",
@@ -11,8 +11,16 @@
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ],
   "share_target": {
-    "action": "/",
-    "method": "GET",
-    "params": { "title": "title", "text": "text", "url": "url" }
+    "action": "/share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        { "name": "file", "accept": ["*/*", "image/*", "video/*", "application/pdf", ".ppt", ".pptx", ".doc", ".docx", ".xls", ".xlsx", ".hwp", ".hwpx"] }
+      ]
+    }
   }
 }

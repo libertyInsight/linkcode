@@ -21,13 +21,15 @@
   html,body{margin:0;background:var(--bg);color:var(--ink);
     font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif}
   main{max-width:560px;margin:0 auto;padding:20px 16px 40px;min-height:100dvh;display:flex;flex-direction:column}
-  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  main.wide{max-width:1100px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:12px}
   .brand{font-weight:800;font-size:22px;letter-spacing:-.02em}
   .brand b{color:var(--accent)}
-  .tabs{display:flex;background:var(--key);border-radius:999px;padding:4px}
-  .tabs button{border:0;background:none;color:var(--sub);font:inherit;font-weight:700;
+  .seg{display:flex;background:var(--key);border-radius:999px;padding:4px}
+  .seg button{border:0;background:none;color:var(--sub);font:inherit;font-weight:700;
     padding:9px 18px;border-radius:999px;cursor:pointer;font-size:15px}
-  .tabs button[aria-selected=true]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .seg button[aria-selected=true]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .seg.small{margin-bottom:16px;align-self:flex-start;display:inline-flex}
   .card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px}
   .hidden{display:none!important}
   h2{margin:0 0 6px;font-size:20px}
@@ -46,15 +48,34 @@
   .msg{min-height:24px;text-align:center;margin-top:14px;font-weight:700}
   .msg.err{color:var(--accent)} .msg.ok{color:var(--ok)}
 
+  /* 받은 파일 */
+  .filehead{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+  .ficon{flex:0 0 auto;width:56px;height:56px;border-radius:14px;background:var(--accent);color:var(--accent-ink);
+    display:grid;place-items:center;font-weight:900;font-size:15px;letter-spacing:.02em}
+  .fname{font-weight:800;font-size:19px;word-break:break-all}
+  .fmeta{color:var(--sub);font-size:14px;margin-top:2px}
+  .preview{border-radius:14px;overflow:hidden;background:var(--bg);margin-bottom:16px;display:grid;place-items:center}
+  .preview img,.preview video{display:block;max-width:100%;max-height:70vh}
+  .stack{display:flex;flex-direction:column;gap:10px}
+
   /* 보내기 */
   textarea{width:100%;min-height:96px;resize:vertical;border:2px solid var(--line);border-radius:14px;
     padding:12px 14px;font:inherit;font-size:16px;background:var(--bg);color:var(--ink)}
   textarea:focus{outline:none;border-color:var(--accent)}
   .row{display:flex;gap:10px;margin-top:12px}
-  .btn{flex:1;border:0;border-radius:14px;padding:16px;font:inherit;font-size:17px;font-weight:800;cursor:pointer}
+  .btn{flex:1;border:0;border-radius:14px;padding:16px;font:inherit;font-size:17px;font-weight:800;cursor:pointer;
+    text-decoration:none;text-align:center;display:block}
   .btn.main{background:var(--accent);color:var(--accent-ink)}
-  .btn.ghost{background:var(--key);color:var(--ink);flex:0 0 auto;padding:16px 18px}
+  .btn.ghost{background:var(--key);color:var(--ink)}
+  .row .btn.ghost{flex:0 0 auto;padding:16px 18px}
   .btn:disabled{opacity:.5}
+  .drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    border:2px dashed var(--line);border-radius:16px;padding:34px 16px;text-align:center;cursor:pointer;background:var(--bg)}
+  .drop.over{border-color:var(--accent)}
+  .drop strong{font-size:17px}
+  .drop span{color:var(--sub);font-size:14px}
+  .bar{height:10px;border-radius:99px;background:var(--key);overflow:hidden;margin-top:14px}
+  .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
   .result{text-align:center;padding:10px 0 0}
   .big{font-size:min(17vw,76px);font-weight:900;letter-spacing:.12em;font-variant-numeric:tabular-nums;margin:8px 0 2px}
   .result small{color:var(--sub);font-size:14px}
@@ -63,10 +84,10 @@
 </style>
 </head>
 <body>
-<main>
+<main id="main">
   <header>
     <div class="brand">링크<b>코드</b></div>
-    <div class="tabs" role="tablist">
+    <div class="seg" role="tablist">
       <button role="tab" id="tab-recv" aria-selected="true">받기</button>
       <button role="tab" id="tab-send" aria-selected="false">보내기</button>
     </div>
@@ -74,22 +95,50 @@
 
   <!-- 받기: 전자칠판 -->
   <section id="recv" class="card">
-    <h2>코드 6자리 입력</h2>
-    <p class="hint">폰에서 받은 숫자를 누르면 바로 열립니다.</p>
-    <div class="slots" id="slots"></div>
-    <div class="pad" id="pad"></div>
-    <div class="msg" id="recvMsg"></div>
+    <div id="padView">
+      <h2>코드 6자리 입력</h2>
+      <p class="hint">폰에서 받은 숫자를 누르면 바로 열립니다.</p>
+      <div class="slots" id="slots"></div>
+      <div class="pad" id="pad"></div>
+      <div class="msg" id="recvMsg"></div>
+    </div>
+    <div id="fileView" class="hidden">
+      <div class="filehead">
+        <div class="ficon" id="fIcon">FILE</div>
+        <div><div class="fname" id="fName"></div><div class="fmeta" id="fMeta"></div></div>
+      </div>
+      <div class="preview hidden" id="fPreview"></div>
+      <div class="stack" id="fActions"></div>
+      <button class="btn ghost" id="backBtn" style="margin-top:10px;width:100%;background:none;border:2px solid var(--line)">다른 코드 입력</button>
+    </div>
   </section>
 
   <!-- 보내기: 폰 -->
   <section id="send" class="card hidden">
-    <h2>링크 보내기</h2>
-    <p class="hint">긴 주소를 붙여넣으면 6자리 코드가 나옵니다. 코드는 30분 동안 유효합니다.</p>
-    <textarea id="urlInput" placeholder="https://..." inputmode="url" autocomplete="off"></textarea>
-    <div class="row">
-      <button class="btn ghost" id="pasteBtn">붙여넣기</button>
-      <button class="btn main" id="makeBtn">코드 만들기</button>
+    <div class="seg small" role="tablist">
+      <button role="tab" id="mode-link" aria-selected="true">링크</button>
+      <button role="tab" id="mode-file" aria-selected="false">파일</button>
     </div>
+
+    <div id="linkForm">
+      <p class="hint">긴 주소를 붙여넣으면 6자리 코드가 나옵니다.</p>
+      <textarea id="urlInput" placeholder="https://..." inputmode="url" autocomplete="off"></textarea>
+      <div class="row">
+        <button class="btn ghost" id="pasteBtn">붙여넣기</button>
+        <button class="btn main" id="makeBtn">코드 만들기</button>
+      </div>
+    </div>
+
+    <div id="fileForm" class="hidden">
+      <p class="hint">PPT, PDF, 사진, 영상 등 100MB까지 올릴 수 있습니다.</p>
+      <label class="drop" id="drop">
+        <strong>파일 고르기</strong>
+        <span>또는 여기로 끌어다 놓기</span>
+        <input type="file" id="fileInput" hidden>
+      </label>
+      <div class="bar hidden" id="bar"><i id="barFill"></i></div>
+    </div>
+
     <div class="msg" id="sendMsg"></div>
     <div class="result hidden" id="result">
       <div class="big" id="codeOut">------</div>
@@ -98,10 +147,10 @@
     </div>
   </section>
 
-  <footer>로그인 없이 작동합니다 · 링크는 30분 뒤 자동 삭제</footer>
+  <footer>로그인 없이 작동합니다 · 코드는 30분 뒤 만료, 파일은 자동 삭제</footer>
 </main>
 
-<script>
+<script type="module">
 const $ = s => document.querySelector(s);
 const host = location.host;
 
@@ -115,12 +164,28 @@ function show(which){
 $("#tab-recv").onclick = () => show("recv");
 $("#tab-send").onclick = () => show("send");
 
+function mode(which){
+  $("#linkForm").classList.toggle("hidden", which !== "link");
+  $("#fileForm").classList.toggle("hidden", which !== "file");
+  $("#mode-link").setAttribute("aria-selected", which === "link");
+  $("#mode-file").setAttribute("aria-selected", which === "file");
+  setMsg($("#sendMsg"), "");
+}
+$("#mode-link").onclick = () => mode("link");
+$("#mode-file").onclick = () => mode("file");
+
+function setMsg(el, text, kind){ el.textContent = text; el.className = "msg " + (kind || ""); }
+function fmtSize(n){
+  if (!n) return "";
+  if (n < 1024*1024) return Math.max(1, Math.round(n/1024)) + "KB";
+  return (n/1024/1024).toFixed(1) + "MB";
+}
+
 /* ---------- 받기 ---------- */
 let digits = "";
 const slots = $("#slots");
 for (let i = 0; i < 6; i++) slots.appendChild(Object.assign(document.createElement("div"), {className:"slot"}));
-const keys = ["1","2","3","4","5","6","7","8","9","지움","0","←"];
-for (const k of keys){
+for (const k of ["1","2","3","4","5","6","7","8","9","지움","0","←"]){
   const b = document.createElement("button");
   b.textContent = k;
   if (k.length > 1) b.className = "fn";
@@ -130,8 +195,6 @@ for (const k of keys){
 function render(){
   [...slots.children].forEach((s,i)=>{ s.textContent = digits[i] || ""; s.classList.toggle("on", i === digits.length); });
 }
-function setMsg(el, text, kind){ el.textContent = text; el.className = "msg " + (kind || ""); }
-
 function press(k){
   if (k === "지움") digits = "";
   else if (k === "←") digits = digits.slice(0, -1);
@@ -141,7 +204,7 @@ function press(k){
   if (digits.length === 6) openCode(digits);
 }
 document.addEventListener("keydown", e => {
-  if ($("#recv").classList.contains("hidden")) return;
+  if ($("#recv").classList.contains("hidden") || $("#padView").classList.contains("hidden")) return;
   if (/^\d$/.test(e.key)) press(e.key);
   else if (e.key === "Backspace") press("←");
   else if (e.key === "Escape") press("지움");
@@ -153,6 +216,7 @@ async function openCode(code){
     const r = await fetch("/api/open?code=" + code);
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
+    if (d.type === "file") return showFile(d);
     setMsg($("#recvMsg"), "열립니다", "ok");
     location.href = d.url;
   } catch (e) {
@@ -161,44 +225,62 @@ async function openCode(code){
   }
 }
 
-/* ---------- 보내기 ---------- */
-let timerId;
-$("#pasteBtn").onclick = async () => {
-  try { $("#urlInput").value = await navigator.clipboard.readText(); }
-  catch { $("#urlInput").focus(); setMsg($("#sendMsg"), "길게 눌러 붙여넣어 주세요", "err"); }
-};
-$("#makeBtn").onclick = () => makeCode($("#urlInput").value);
+const OFFICE = /\.(pptx?|ppsx?|docx?|xlsx?)$/i;
+function showFile(f){
+  show("recv");
+  $("#padView").classList.add("hidden");
+  $("#fileView").classList.remove("hidden");
+  const ext = (f.name.match(/\.([a-z0-9]+)$/i) || [,"FILE"])[1].toUpperCase().slice(0,4);
+  $("#fIcon").textContent = ext;
+  $("#fName").textContent = f.name;
+  $("#fMeta").textContent = fmtSize(f.size);
 
-function extractUrl(text){
-  const m = String(text || "").match(/https?:\/\/[^\s]+/i);
-  return m ? m[0] : String(text || "").trim();
-}
+  const pv = $("#fPreview"), acts = $("#fActions");
+  pv.innerHTML = ""; acts.innerHTML = ""; pv.classList.add("hidden");
+  const btn = (label, href, main) => {
+    const a = Object.assign(document.createElement("a"), {className:"btn " + (main ? "main" : "ghost"), textContent:label, href});
+    acts.appendChild(a);
+  };
+  const type = f.contentType || "";
 
-async function makeCode(raw){
-  const url = extractUrl(raw);
-  if (!url) return setMsg($("#sendMsg"), "링크를 넣어 주세요", "err");
-  $("#makeBtn").disabled = true;
-  setMsg($("#sendMsg"), "만드는 중…");
-  try {
-    const r = await fetch("/api/create", {
-      method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({url})
-    });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error);
-    setMsg($("#sendMsg"), "");
-    $("#codeOut").textContent = d.code;
-    $("#shortOut").textContent = host + "/" + d.code;
-    $("#result").classList.remove("hidden");
-    startTimer(d.expiresIn);
-  } catch (e) {
-    setMsg($("#sendMsg"), e.message || "실패했습니다", "err");
-  } finally {
-    $("#makeBtn").disabled = false;
+  if (type.startsWith("image/")) {
+    pv.appendChild(Object.assign(document.createElement("img"), {src:f.url, alt:f.name}));
+    pv.classList.remove("hidden");
+    $("#main").classList.add("wide");
+    btn("크게 보기", f.url, true);
+    btn("내려받기", f.downloadUrl);
+  } else if (type.startsWith("video/")) {
+    pv.appendChild(Object.assign(document.createElement("video"), {src:f.url, controls:true, playsInline:true}));
+    pv.classList.remove("hidden");
+    $("#main").classList.add("wide");
+    btn("내려받기", f.downloadUrl);
+  } else if (OFFICE.test(f.name)) {
+    btn("웹에서 바로 보기", "https://view.officeapps.live.com/op/view.aspx?src=" + encodeURIComponent(f.url), true);
+    btn("내려받아 앱으로 열기", f.downloadUrl);
+  } else if (type === "application/pdf" || /\.pdf$/i.test(f.name)) {
+    btn("열기", f.url, true);
+    btn("내려받기", f.downloadUrl);
+  } else {
+    btn("내려받기", f.downloadUrl, true);
   }
 }
-function startTimer(sec){
+$("#backBtn").onclick = () => {
+  $("#fileView").classList.add("hidden");
+  $("#padView").classList.remove("hidden");
+  $("#main").classList.remove("wide");
+  $("#fPreview").innerHTML = "";
+  digits = ""; render(); setMsg($("#recvMsg"), "");
+};
+
+/* ---------- 보내기: 공통 ---------- */
+let timerId;
+function showCode(d){
+  setMsg($("#sendMsg"), "");
+  $("#codeOut").textContent = d.code;
+  $("#shortOut").textContent = host + "/" + d.code;
+  $("#result").classList.remove("hidden");
   clearInterval(timerId);
-  const end = Date.now() + sec * 1000;
+  const end = Date.now() + d.expiresIn * 1000;
   const tick = () => {
     const left = Math.max(0, Math.round((end - Date.now()) / 1000));
     $("#timer").textContent = left ? `${Math.floor(left/60)}분 ${String(left%60).padStart(2,"0")}초 남음` : "만료되었습니다";
@@ -206,15 +288,102 @@ function startTimer(sec){
   };
   tick(); timerId = setInterval(tick, 1000);
 }
+async function createCode(payload){
+  const r = await fetch("/api/create", {
+    method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(payload)
+  });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error);
+  return d;
+}
+
+/* ---------- 보내기: 링크 ---------- */
+$("#pasteBtn").onclick = async () => {
+  try { $("#urlInput").value = await navigator.clipboard.readText(); }
+  catch { $("#urlInput").focus(); setMsg($("#sendMsg"), "길게 눌러 붙여넣어 주세요", "err"); }
+};
+$("#makeBtn").onclick = () => makeLinkCode($("#urlInput").value);
+function extractUrl(text){
+  const m = String(text || "").match(/https?:\/\/[^\s]+/i);
+  return m ? m[0] : String(text || "").trim();
+}
+async function makeLinkCode(raw){
+  const url = extractUrl(raw);
+  if (!url) return setMsg($("#sendMsg"), "링크를 넣어 주세요", "err");
+  $("#makeBtn").disabled = true;
+  setMsg($("#sendMsg"), "만드는 중…");
+  try { showCode(await createCode({url})); }
+  catch (e) { setMsg($("#sendMsg"), e.message || "실패했습니다", "err"); }
+  finally { $("#makeBtn").disabled = false; }
+}
+
+/* ---------- 보내기: 파일 ---------- */
+const MAX = 100 * 1024 * 1024;
+$("#fileInput").onchange = e => e.target.files[0] && sendFile(e.target.files[0]);
+const drop = $("#drop");
+drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+drop.addEventListener("drop", e => {
+  e.preventDefault(); drop.classList.remove("over");
+  const f = e.dataTransfer.files[0]; if (f) sendFile(f);
+});
+
+let busy = false;
+async function sendFile(file){
+  if (busy) return;
+  mode("file"); show("send");
+  $("#result").classList.add("hidden");
+  if (file.size > MAX) return setMsg($("#sendMsg"), "100MB 이하 파일만 올릴 수 있습니다", "err");
+  busy = true;
+  $("#bar").classList.remove("hidden"); $("#barFill").style.width = "0%";
+  setMsg($("#sendMsg"), `올리는 중… ${file.name}`);
+  try {
+    const { upload } = await import("/vendor/blob-upload.js");
+    const safe = file.name.replace(/[\\/#?%]/g, "_");
+    const blob = await upload(`files/${safe}`, file, {
+      access: "public",
+      handleUploadUrl: "/api/upload",
+      contentType: file.type || undefined,
+      multipart: file.size > 20 * 1024 * 1024,
+      onUploadProgress: p => { $("#barFill").style.width = p.percentage + "%"; },
+    });
+    $("#barFill").style.width = "100%";
+    showCode(await createCode({ file: {
+      url: blob.url, downloadUrl: blob.downloadUrl, name: file.name,
+      size: file.size, contentType: blob.contentType || file.type,
+    }}));
+  } catch (e) {
+    setMsg($("#sendMsg"), e.message || "올리기에 실패했습니다", "err");
+  } finally {
+    busy = false;
+    $("#fileInput").value = "";
+    setTimeout(() => $("#bar").classList.add("hidden"), 800);
+  }
+}
 
 /* ---------- 시작 화면 결정 ---------- */
 const q = new URLSearchParams(location.search);
-const shared = q.get("url") || q.get("text") || q.get("title"); // 폰 '공유' 메뉴로 들어온 경우
-if (shared) {
+const shared = q.get("url") || q.get("text") || q.get("title"); // 폰 '공유' 메뉴로 링크가 들어온 경우
+if (q.get("share") === "file") {
+  history.replaceState(null, "", "/");
+  try {
+    const cache = await caches.open("linkcode-share");
+    const res = await cache.match("/shared-file");
+    if (res) {
+      const name = decodeURIComponent(res.headers.get("x-name") || "파일");
+      const file = new File([await res.blob()], name, { type: res.headers.get("content-type") || "" });
+      await cache.delete("/shared-file");
+      sendFile(file);
+    }
+  } catch { show("send"); mode("file"); }
+} else if (shared) {
   show("send");
   $("#urlInput").value = extractUrl(shared);
   history.replaceState(null, "", "/");
-  makeCode(shared);
+  makeLinkCode(shared);
+} else if (q.get("c")) {
+  const c = q.get("c"); history.replaceState(null, "", "/");
+  digits = c; render(); openCode(c);
 } else if (q.get("notfound")) {
   setMsg($("#recvMsg"), "없거나 만료된 코드입니다", "err");
   history.replaceState(null, "", "/");

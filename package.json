@@ -2,5 +2,8 @@
   "name": "linkcode",
   "private": true,
   "type": "module",
-  "description": "긴 링크를 6자리 숫자 코드로 바꿔 다른 기기에서 바로 여는 앱 (로그인 없음)"
+  "description": "긴 링크나 파일을 6자리 숫자 코드로 바꿔 다른 기기에서 바로 여는 앱 (로그인 없음)",
+  "dependencies": {
+    "@vercel/blob": "2.8.2"
+  }
 }

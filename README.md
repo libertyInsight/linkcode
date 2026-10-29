@@ -1,32 +1,38 @@
 # 링크코드
 
-긴 링크를 6자리 숫자 코드로 바꿔, 전자칠판 같은 공용 기기에서 로그인 없이 바로 여는 앱.
+긴 링크나 파일을 6자리 숫자 코드로 바꿔, 전자칠판 같은 공용 기기에서 로그인 없이 바로 여는 앱.
 
-- **폰(보내기)**: 링크 붙여넣기 → 6자리 코드
-- **칠판(받기)**: 숫자 6개 누르면 바로 열림 · 또는 주소창에 `내주소/123456`
-- 코드는 30분 뒤 자동 삭제 (`lib/store.js`의 `TTL_SECONDS`에서 변경)
-- 폰에 '홈 화면에 추가'하면 안드로이드 **공유 메뉴**에 링크코드가 생겨, 어떤 앱에서든 공유 → 코드가 바로 나옴
+- **폰(보내기)**: 링크 붙여넣기 또는 파일 고르기 → 6자리 코드
+- **칠판(받기)**: 숫자 6개 누르면 열림 · 또는 주소창에 `내주소/123456`
+  - 링크: 바로 이동
+  - PPT·워드·엑셀: '웹에서 바로 보기'(Office 웹 뷰어, 로그인 불필요) 또는 내려받기
+  - 사진·영상: 화면에 바로 표시 / PDF: 열기
+- 코드는 30분 뒤 만료, 파일은 매일 새벽 자동 삭제 (올린 지 2시간 지난 것)
+- 파일 한 개 최대 100MB (`api/upload.js`의 `MAX_BYTES`)
+- 폰에서 '홈 화면에 추가'하면 안드로이드 **공유 메뉴**에 링크코드가 생겨, 링크든 파일이든 공유 → 바로 코드
 
-## 배포 (Vercel)
+## 처음 배포
 
-1. 이 폴더를 GitHub 새 저장소에 올리기
-2. Vercel → Add New → Project → 저장소 선택 → Deploy (설정 변경 없음)
-3. 프로젝트 → **Storage** 탭 → Marketplace에서 **Upstash (Redis)** 선택 → 무료 플랜으로 생성 → 이 프로젝트에 Connect
-4. Deployments → 최신 배포 → **Redeploy** (환경변수 반영)
-
-환경변수는 3번에서 자동으로 들어갑니다 (`KV_REST_API_URL`/`KV_REST_API_TOKEN` 또는 `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` 둘 다 인식).
-
-## 전자칠판 설정 (한 번만)
-
-칠판 브라우저에서 배포 주소를 열고 **북마크** 또는 **시작 페이지**로 지정. 큰 화면에서는 자동으로 '받기' 화면이 뜹니다.
+1. 이 폴더 안의 내용을 GitHub 저장소에 올리기
+2. Vercel → Add New → Project → 저장소 선택 → Deploy
+3. Storage → **Upstash for Redis** (Free) 생성 → 프로젝트에 Connect
+4. Storage → **Blob** 생성 (접근 방식을 묻으면 **Public**) → 프로젝트에 Connect
+5. Deployments → 최신 배포 ⋯ → **Redeploy**
 
 ## 구조
 
 ```
-index.html            화면 (받기/보내기)
-api/create.js         링크 → 코드 생성
-api/open.js           코드 → 링크 조회 / 바로 이동
-lib/store.js          Redis 저장 (만료 포함)
-vercel.json           /123456 주소를 바로 이동으로 연결
-manifest.webmanifest  앱 설치 + 공유 메뉴 등록
+index.html             화면 (받기/보내기)
+api/create.js          링크·파일 → 코드 생성
+api/open.js            코드 → 링크·파일 정보 / 바로 이동
+api/upload.js          파일 업로드 허가(토큰) 발급, 업로드 횟수 제한
+api/cleanup.js         오래된 파일 삭제 (매일 1회 자동 실행)
+lib/store.js           Redis 저장·만료·횟수 제한
+vendor/blob-upload.js  브라우저용 업로드 라이브러리 (@vercel/blob 2.8.2 묶음)
+sw.js                  앱 설치 + 공유 메뉴로 들어온 파일 받기
+vercel.json            /123456 주소 연결, 자동 삭제 일정
 ```
+
+## 참고
+
+파일은 추측할 수 없는 긴 주소로 저장되지만 주소를 아는 사람은 열 수 있습니다. 민감한 개인정보 파일은 올리지 마세요.
