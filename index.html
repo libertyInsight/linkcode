@@ -339,9 +339,10 @@ async function sendFile(file){
   setMsg($("#sendMsg"), `올리는 중… ${file.name}`);
   try {
     const { upload } = await import("/vendor/blob-upload.js");
-    const safe = file.name.replace(/[\\/#?%]/g, "_");
-    lastPath = `files/${safe}`;
-    const blob = await upload(`files/${safe}`, file, {
+    // 저장소에는 영문·숫자 이름으로 (한글 이름은 전송 중 깨질 수 있음), 화면에는 원래 이름 표시
+    const ext = ((file.name.match(/\.([A-Za-z0-9]{1,8})$/) || [])[1] || "bin").toLowerCase();
+    lastPath = `files/${Date.now().toString(36)}.${ext}`;
+    const blob = await upload(lastPath, file, {
       access: "public",
       handleUploadUrl: "/api/upload",
       contentType: file.type || undefined,
@@ -350,7 +351,7 @@ async function sendFile(file){
     });
     $("#barFill").style.width = "100%";
     showCode(await createCode({ file: {
-      url: blob.url, downloadUrl: blob.downloadUrl, name: file.name,
+      url: blob.url, downloadUrl: blob.downloadUrl, name: file.name.normalize("NFC"),
       size: file.size, contentType: blob.contentType || file.type,
     }}));
   } catch (e) {
