@@ -328,7 +328,7 @@ drop.addEventListener("drop", e => {
   const f = e.dataTransfer.files[0]; if (f) sendFile(f);
 });
 
-let busy = false;
+let busy = false, lastPath = "";
 async function sendFile(file){
   if (busy) return;
   mode("file"); show("send");
@@ -340,6 +340,7 @@ async function sendFile(file){
   try {
     const { upload } = await import("/vendor/blob-upload.js");
     const safe = file.name.replace(/[\\/#?%]/g, "_");
+    lastPath = `files/${safe}`;
     const blob = await upload(`files/${safe}`, file, {
       access: "public",
       handleUploadUrl: "/api/upload",
@@ -354,9 +355,12 @@ async function sendFile(file){
     }}));
   } catch (e) {
     let msg = e.message || "올리기에 실패했습니다";
-    try { // 서버가 알려주는 실제 원인을 함께 표시
-      const d = await (await fetch("/api/upload")).json();
-      if (!d.ok && d.error) msg = "파일 저장소 오류: " + d.error;
+    try { // 같은 요청을 다시 보내 서버가 알려주는 실제 원인을 표시
+      const r = await fetch("/api/upload", { method: "POST", headers: {"content-type":"application/json"},
+        body: JSON.stringify({ type: "blob.generate-presigned-url",
+          payload: { pathname: lastPath, clientPayload: null, multipart: file.size > 20 * 1024 * 1024 } }) });
+      const t = await r.text();
+      if (!r.ok) { let d = {}; try { d = JSON.parse(t); } catch {} msg = `서버 오류(${r.status}): ` + (d.error || t.slice(0, 200)); }
     } catch {}
     setMsg($("#sendMsg"), msg, "err");
   } finally {
