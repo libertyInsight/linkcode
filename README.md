@@ -16,7 +16,7 @@
 1. 이 폴더 안의 내용을 GitHub 저장소에 올리기
 2. Vercel → Add New → Project → 저장소 선택 → Deploy
 3. Storage → **Upstash for Redis** (Free) 생성 → 프로젝트에 Connect
-4. Storage → **Blob** 생성 (접근 방식을 묻으면 **Public**) → 프로젝트에 Connect
+4. Storage → **Blob** 생성 (**Public**) → 프로젝트에 Connect (BLOB_STORE_ID로 자동 인증, 토큰 설정 불필요)
 5. Deployments → 최신 배포 ⋯ → **Redeploy**
 
 ## 구조
@@ -25,7 +25,7 @@
 index.html             화면 (받기/보내기)
 api/create.js          링크·파일 → 코드 생성
 api/open.js            코드 → 링크·파일 정보 / 바로 이동
-api/upload.js          파일 업로드 허가(토큰) 발급, 업로드 횟수 제한
+api/upload.js          파일 업로드 허가 주소(presigned) 발급, 업로드 횟수 제한
 api/cleanup.js         오래된 파일 삭제 (매일 1회 자동 실행)
 lib/store.js           Redis 저장·만료·횟수 제한
 vendor/blob-upload.js  브라우저용 업로드 라이브러리 (@vercel/blob 2.8.2 묶음)

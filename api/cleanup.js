@@ -1,4 +1,5 @@
 import { list, del } from "@vercel/blob";
+import { blobAuth } from "../lib/blobauth.js";
 
 const KEEP_MS = 2 * 60 * 60 * 1000; // 올린 지 2시간 지난 파일은 삭제 (코드는 30분이면 이미 만료)
 
@@ -13,9 +14,9 @@ export default async function handler(req, res) {
   let cursor, deleted = 0;
   try {
     do {
-      const page = await list({ prefix: "files/", cursor, limit: 1000 });
+      const page = await list({ ...blobAuth(req), prefix: "files/", cursor, limit: 1000 });
       const old = page.blobs.filter(b => new Date(b.uploadedAt).getTime() < cutoff).map(b => b.url);
-      if (old.length) { await del(old); deleted += old.length; }
+      if (old.length) { await del(old, blobAuth(req)); deleted += old.length; }
       cursor = page.hasMore ? page.cursor : undefined;
     } while (cursor);
     res.status(200).json({ deleted });

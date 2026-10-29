@@ -353,7 +353,12 @@ async function sendFile(file){
       size: file.size, contentType: blob.contentType || file.type,
     }}));
   } catch (e) {
-    setMsg($("#sendMsg"), e.message || "올리기에 실패했습니다", "err");
+    let msg = e.message || "올리기에 실패했습니다";
+    try { // 서버가 알려주는 실제 원인을 함께 표시
+      const d = await (await fetch("/api/upload")).json();
+      if (!d.ok && d.error) msg = "파일 저장소 오류: " + d.error;
+    } catch {}
+    setMsg($("#sendMsg"), msg, "err");
   } finally {
     busy = false;
     $("#fileInput").value = "";
