@@ -1,18 +1,38 @@
 {
   "rewrites": [
-    { "source": "/:code(\\d{6})", "destination": "/api/open?code=:code&go=1" }
+    {
+      "source": "/wait",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/:code(\\d{6})",
+      "destination": "/api/open?code=:code&go=1"
+    }
   ],
   "crons": [
-    { "path": "/api/cleanup", "schedule": "0 18 * * *" }
+    {
+      "path": "/api/cleanup",
+      "schedule": "0 18 * * *"
+    }
   ],
   "headers": [
     {
       "source": "/api/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
     },
     {
       "source": "/sw.js",
-      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
     }
   ]
 }

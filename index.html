@@ -47,6 +47,9 @@
   .pad .fn{font-size:17px;color:var(--sub)}
   .msg{min-height:24px;text-align:center;margin-top:14px;font-weight:700}
   .msg.err{color:var(--accent)} .msg.ok{color:var(--ok)}
+  .waitlink{display:block;margin-top:14px;text-align:center;padding:14px;border-radius:14px;border:2px dashed var(--line);
+    color:var(--ink);text-decoration:none;font-weight:800}
+  .waitlink span{display:block;color:var(--sub);font-weight:500;font-size:13px;margin-top:2px}
 
   /* 받은 파일 */
   .filehead{display:flex;align-items:center;gap:14px;margin-bottom:16px}
@@ -59,15 +62,28 @@
   .stack{display:flex;flex-direction:column;gap:10px}
 
   /* 보내기 */
+  .dest{margin-bottom:16px}
+  .dest > span{display:block;font-size:13px;font-weight:700;color:var(--sub);margin-bottom:8px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{border:2px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-weight:700;font-size:15px;
+    padding:9px 14px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .chip[aria-pressed=true]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+  .chip.add{border-style:dashed;color:var(--sub)}
+  .chip .x{font-weight:400;opacity:.7;padding-left:2px}
+  .pairbox{background:var(--bg);border-radius:16px;padding:16px;margin-bottom:16px}
+  .pairbox .hint{margin-bottom:10px}
+  .pairbox input{flex:1;min-width:0;border:2px solid var(--line);border-radius:14px;padding:14px;font:inherit;font-size:22px;
+    font-weight:800;letter-spacing:.2em;text-align:center;background:var(--card);color:var(--ink)}
+  .pairbox .row{margin-top:0}
   textarea{width:100%;min-height:96px;resize:vertical;border:2px solid var(--line);border-radius:14px;
     padding:12px 14px;font:inherit;font-size:16px;background:var(--bg);color:var(--ink)}
-  textarea:focus{outline:none;border-color:var(--accent)}
+  textarea:focus,.pairbox input:focus{outline:none;border-color:var(--accent)}
   .row{display:flex;gap:10px;margin-top:12px}
   .btn{flex:1;border:0;border-radius:14px;padding:16px;font:inherit;font-size:17px;font-weight:800;cursor:pointer;
     text-decoration:none;text-align:center;display:block}
   .btn.main{background:var(--accent);color:var(--accent-ink)}
   .btn.ghost{background:var(--key);color:var(--ink)}
-  .row .btn.ghost{flex:0 0 auto;padding:16px 18px}
+  .row .btn.ghost,.row .btn.fit{flex:0 0 auto;padding:16px 18px}
   .btn:disabled{opacity:.5}
   .drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
     border:2px dashed var(--line);border-radius:16px;padding:34px 16px;text-align:center;cursor:pointer;background:var(--bg)}
@@ -77,10 +93,48 @@
   .bar{height:10px;border-radius:99px;background:var(--key);overflow:hidden;margin-top:14px}
   .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
   .result{text-align:center;padding:10px 0 0}
+  .sent{display:inline-block;background:var(--ok);color:#fff;font-weight:800;padding:10px 16px;border-radius:12px;margin-bottom:8px}
   .big{font-size:min(17vw,76px);font-weight:900;letter-spacing:.12em;font-variant-numeric:tabular-nums;margin:8px 0 2px}
+  .result.compact .big{font-size:34px;margin-top:4px}
   .result small{color:var(--sub);font-size:14px}
   .shorturl{margin-top:14px;padding:12px;border-radius:12px;background:var(--bg);font-size:15px;word-break:break-all}
+  .resend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
   footer{margin-top:auto;padding-top:24px;text-align:center;color:var(--sub);font-size:13px;line-height:1.6}
+
+  /* ---------- 칠판 대기 모드 ---------- */
+  .wait{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column}
+  .wtop{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px;flex-wrap:wrap}
+  .wname{font-weight:900;font-size:22px;display:flex;align-items:center;gap:10px}
+  .wname .dot{width:12px;height:12px;border-radius:50%;background:var(--ok)}
+  .wname .dot.off{background:var(--accent)}
+  .wtools{display:flex;gap:8px;flex-wrap:wrap}
+  .wtools button{border:0;background:var(--key);color:var(--ink);font:inherit;font-weight:700;font-size:16px;
+    padding:12px 16px;border-radius:12px;cursor:pointer}
+  .wtools button.main{background:var(--accent);color:var(--accent-ink)}
+  .wbody{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;min-height:0}
+  .pulse{width:120px;height:120px;border-radius:50%;background:var(--accent);opacity:.9;position:relative;margin-bottom:18px}
+  .pulse::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--accent);animation:ring 2.4s ease-out infinite}
+  .pulse.slow::after{animation-duration:6s}
+  @keyframes ring{from{transform:scale(1);opacity:.5}to{transform:scale(2.2);opacity:0}}
+  @media (prefers-reduced-motion: reduce){.pulse::after{animation:none}}
+  .wtitle{font-size:clamp(36px,6vw,64px);font-weight:900;letter-spacing:-.02em}
+  .wsub{font-size:clamp(17px,2vw,22px);color:var(--sub)}
+  .wpair{margin-top:26px;background:var(--card);border:2px solid var(--line);border-radius:22px;padding:22px 34px}
+  .wpair .lbl{color:var(--sub);font-weight:700;font-size:18px}
+  .wpair .num{font-size:clamp(56px,9vw,96px);font-weight:900;letter-spacing:.14em;font-variant-numeric:tabular-nums;line-height:1.1}
+  .wpair .how{color:var(--sub);font-size:16px;margin-top:6px}
+  .wsetup{width:min(480px,100%)}
+  .wsetup input{width:100%;border:2px solid var(--line);border-radius:14px;padding:16px;font:inherit;font-size:22px;
+    text-align:center;background:var(--card);color:var(--ink);margin:14px 0}
+  .wshow{flex:1;display:flex;flex-direction:column;min-height:0;padding:0 22px 18px;gap:12px}
+  .wshow .media{flex:1;min-height:0;display:grid;place-items:center;background:#000;border-radius:16px;overflow:hidden}
+  .wshow .media img,.wshow .media video{max-width:100%;max-height:100%;object-fit:contain;display:block}
+  .wshow .info{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .wshow .info b{font-size:18px;word-break:break-all}
+  .wfoot{padding:10px 22px 14px;color:var(--sub);font-size:13px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .wfoot button{background:none;border:0;color:var(--sub);font:inherit;font-size:13px;text-decoration:underline;cursor:pointer;padding:0 0 0 12px}
+  .toast{position:fixed;left:50%;bottom:40px;transform:translateX(-50%);background:var(--ink);color:var(--bg);
+    padding:16px 26px;border-radius:14px;font-weight:800;font-size:20px;z-index:60}
 </style>
 </head>
 <body>
@@ -101,6 +155,7 @@
       <div class="slots" id="slots"></div>
       <div class="pad" id="pad"></div>
       <div class="msg" id="recvMsg"></div>
+      <a class="waitlink" href="/wait">칠판 대기 모드<span>띄워 두면 폰에서 보낼 때 코드 없이 바로 열립니다</span></a>
     </div>
     <div id="fileView" class="hidden">
       <div class="filehead">
@@ -115,13 +170,26 @@
 
   <!-- 보내기: 폰 -->
   <section id="send" class="card hidden">
+    <div class="dest">
+      <span>보낼 곳</span>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="pairbox hidden" id="pairBox">
+      <p class="hint">칠판 대기 화면에서 <b>폰 연결하기</b>를 누르면 나오는 연결번호 6자리를 넣으세요. 한 번만 하면 됩니다.</p>
+      <div class="row">
+        <input id="pairInput" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="off">
+        <button class="btn main fit" id="pairBtn">연결</button>
+      </div>
+      <div class="msg" id="pairMsg"></div>
+    </div>
+
     <div class="seg small" role="tablist">
       <button role="tab" id="mode-link" aria-selected="true">링크</button>
       <button role="tab" id="mode-file" aria-selected="false">파일</button>
     </div>
 
     <div id="linkForm">
-      <p class="hint">긴 주소를 붙여넣으면 6자리 코드가 나옵니다.</p>
+      <p class="hint" id="linkHint">긴 주소를 붙여넣으면 6자리 코드가 나옵니다.</p>
       <textarea id="urlInput" placeholder="https://..." inputmode="url" autocomplete="off"></textarea>
       <div class="row">
         <button class="btn ghost" id="pasteBtn">붙여넣기</button>
@@ -141,18 +209,74 @@
 
     <div class="msg" id="sendMsg"></div>
     <div class="result hidden" id="result">
+      <div class="sent hidden" id="sentTo"></div>
       <div class="big" id="codeOut">------</div>
       <small id="timer"></small>
-      <div class="shorturl">칠판 주소창에 바로 입력해도 열립니다<br><b id="shortOut"></b></div>
+      <div class="shorturl" id="shortBox">칠판 주소창에 바로 입력해도 열립니다<br><b id="shortOut"></b></div>
+      <div class="resend" id="resend"></div>
     </div>
   </section>
 
   <footer>로그인 없이 작동합니다 · 코드는 30분 뒤 만료, 파일은 자동 삭제</footer>
 </main>
 
+<!-- 칠판 대기 모드 (주소/wait) -->
+<div class="wait hidden" id="wait">
+  <div class="wtop">
+    <div class="wname"><i class="dot" id="wDot"></i><span id="wName">링크코드</span></div>
+    <div class="wtools" id="wTools">
+      <button class="main" id="wPairBtn">폰 연결하기</button>
+      <button id="wFullBtn">전체화면</button>
+      <button id="wExitBtn">코드로 열기</button>
+    </div>
+  </div>
+
+  <div class="wbody hidden" id="wSetup">
+    <div class="wsetup">
+      <div class="wtitle" style="font-size:34px">칠판 이름 정하기</div>
+      <div class="wsub" style="margin-top:6px">폰에서 보낼 곳을 고를 때 보이는 이름입니다</div>
+      <input id="wNameInput" placeholder="예: 3학년 2반" maxlength="30">
+      <button class="btn main" id="wCreateBtn" style="width:100%">대기 시작</button>
+      <div class="msg" id="wSetupMsg"></div>
+    </div>
+  </div>
+
+  <div class="wbody hidden" id="wIdle">
+    <div class="pulse" id="wPulse"></div>
+    <div class="wtitle">대기 중</div>
+    <div class="wsub">폰에서 이 칠판으로 보내면 바로 열립니다</div>
+    <div class="wpair hidden" id="wPairBox">
+      <div class="lbl">연결번호</div>
+      <div class="num" id="wPairCode">------</div>
+      <div class="how">폰 링크코드 → 보내기 → <b>+ 칠판 연결</b>에 입력 · <span id="wPairLeft"></span></div>
+    </div>
+  </div>
+
+  <div class="wshow hidden" id="wShow">
+    <div class="info"><b id="wShowName"></b><div class="wtools" id="wShowActs"></div></div>
+    <div class="media" id="wMedia"></div>
+  </div>
+
+  <div class="wfoot">
+    <span id="wStatus">연결 중…</span>
+    <span><button id="wRename">이름 바꾸기</button><button id="wReset">연결 초기화</button></span>
+  </div>
+</div>
+
 <script type="module">
 const $ = s => document.querySelector(s);
 const host = location.host;
+const store = {
+  get(k, d){ try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k){ try { localStorage.removeItem(k); } catch {} },
+};
+async function api(path, body){
+  const r = await fetch(path, body ? { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) } : undefined);
+  let d = {}; try { d = await r.json(); } catch {}
+  if (!r.ok) { const e = new Error(d.error || `요청 실패 (${r.status})`); Object.assign(e, d); throw e; }
+  return d;
+}
 
 /* ---------- 탭 ---------- */
 function show(which){
@@ -180,6 +304,9 @@ function fmtSize(n){
   if (n < 1024*1024) return Math.max(1, Math.round(n/1024)) + "KB";
   return (n/1024/1024).toFixed(1) + "MB";
 }
+const OFFICE = /\.(pptx?|ppsx?|docx?|xlsx?)$/i;
+const officeViewer = url => "https://view.officeapps.live.com/op/view.aspx?src=" + encodeURIComponent(url);
+const isPdf = f => f.contentType === "application/pdf" || /\.pdf$/i.test(f.name || "");
 
 /* ---------- 받기 ---------- */
 let digits = "";
@@ -204,6 +331,7 @@ function press(k){
   if (digits.length === 6) openCode(digits);
 }
 document.addEventListener("keydown", e => {
+  if (!$("#wait").classList.contains("hidden")) return;
   if ($("#recv").classList.contains("hidden") || $("#padView").classList.contains("hidden")) return;
   if (/^\d$/.test(e.key)) press(e.key);
   else if (e.key === "Backspace") press("←");
@@ -213,9 +341,7 @@ document.addEventListener("keydown", e => {
 async function openCode(code){
   setMsg($("#recvMsg"), "여는 중…");
   try {
-    const r = await fetch("/api/open?code=" + code);
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error);
+    const d = await api("/api/open?code=" + code);
     if (d.type === "file") return showFile(d);
     setMsg($("#recvMsg"), "열립니다", "ok");
     location.href = d.url;
@@ -225,7 +351,6 @@ async function openCode(code){
   }
 }
 
-const OFFICE = /\.(pptx?|ppsx?|docx?|xlsx?)$/i;
 function showFile(f){
   show("recv");
   $("#padView").classList.add("hidden");
@@ -238,8 +363,7 @@ function showFile(f){
   const pv = $("#fPreview"), acts = $("#fActions");
   pv.innerHTML = ""; acts.innerHTML = ""; pv.classList.add("hidden");
   const btn = (label, href, main) => {
-    const a = Object.assign(document.createElement("a"), {className:"btn " + (main ? "main" : "ghost"), textContent:label, href});
-    acts.appendChild(a);
+    acts.appendChild(Object.assign(document.createElement("a"), {className:"btn " + (main ? "main" : "ghost"), textContent:label, href}));
   };
   const type = f.contentType || "";
 
@@ -255,9 +379,9 @@ function showFile(f){
     $("#main").classList.add("wide");
     btn("내려받기", f.downloadUrl);
   } else if (OFFICE.test(f.name)) {
-    btn("웹에서 바로 보기", "https://view.officeapps.live.com/op/view.aspx?src=" + encodeURIComponent(f.url), true);
+    btn("웹에서 바로 보기", officeViewer(f.url), true);
     btn("내려받아 앱으로 열기", f.downloadUrl);
-  } else if (type === "application/pdf" || /\.pdf$/i.test(f.name)) {
+  } else if (isPdf(f)) {
     btn("열기", f.url, true);
     btn("내려받기", f.downloadUrl);
   } else {
@@ -272,29 +396,98 @@ $("#backBtn").onclick = () => {
   digits = ""; render(); setMsg($("#recvMsg"), "");
 };
 
+/* ---------- 보내기: 보낼 곳 (코드만 / 연결된 칠판) ---------- */
+let rooms = store.get("lc_rooms", []);       // [{ id, name }]
+let dest = store.get("lc_dest", "");         // "" = 코드만, 아니면 칠판 id
+if (dest && !rooms.some(r => r.id === dest)) dest = "";
+
+function renderChips(){
+  const box = $("#chips"); box.innerHTML = "";
+  const chip = (label, pressed, onclick, cls = "") => {
+    const b = Object.assign(document.createElement("button"), { className: "chip " + cls, onclick });
+    b.setAttribute("aria-pressed", pressed);
+    b.textContent = label;
+    box.appendChild(b); return b;
+  };
+  chip("코드만", dest === "", () => setDest(""));
+  for (const r of rooms) {
+    const b = chip(r.name, dest === r.id, () => setDest(r.id));
+    const x = Object.assign(document.createElement("span"), { className:"x", textContent:"×", title:"연결 해제" });
+    x.onclick = ev => { ev.stopPropagation(); if (confirm(`'${r.name}' 연결을 지울까요?`)) removeRoom(r.id); };
+    b.appendChild(x);
+  }
+  chip("+ 칠판 연결", false, () => {
+    $("#pairBox").classList.toggle("hidden");
+    if (!$("#pairBox").classList.contains("hidden")) $("#pairInput").focus();
+  }, "add");
+  const toBoard = rooms.find(r => r.id === dest);
+  $("#makeBtn").textContent = toBoard ? `${toBoard.name}에 띄우기` : "코드 만들기";
+  $("#linkHint").textContent = toBoard
+    ? `링크를 넣으면 '${toBoard.name}' 칠판에 바로 열립니다.`
+    : "긴 주소를 붙여넣으면 6자리 코드가 나옵니다.";
+}
+function setDest(id){ dest = id; store.set("lc_dest", dest); renderChips(); }
+function removeRoom(id){
+  rooms = rooms.filter(r => r.id !== id); store.set("lc_rooms", rooms);
+  if (dest === id) setDest(""); else renderChips();
+}
+$("#pairInput").addEventListener("input", e => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 6); });
+$("#pairBtn").onclick = async () => {
+  const code = $("#pairInput").value;
+  if (code.length !== 6) return setMsg($("#pairMsg"), "연결번호 6자리를 넣어 주세요", "err");
+  setMsg($("#pairMsg"), "연결 중…");
+  try {
+    const d = await api("/api/room", { action: "pair", code });
+    rooms = rooms.filter(r => r.id !== d.roomId).concat({ id: d.roomId, name: d.name });
+    store.set("lc_rooms", rooms);
+    $("#pairInput").value = "";
+    setMsg($("#pairMsg"), "");
+    $("#pairBox").classList.add("hidden");
+    setDest(d.roomId);
+    setMsg($("#sendMsg"), `'${d.name}' 칠판과 연결되었습니다`, "ok");
+  } catch (e) { setMsg($("#pairMsg"), e.message, "err"); }
+};
+
 /* ---------- 보내기: 공통 ---------- */
 let timerId;
 function showCode(d){
   setMsg($("#sendMsg"), "");
+  const sent = !!d.sentTo;
+  $("#sentTo").textContent = sent ? `✓ ${d.sentTo} 칠판에 띄웠습니다` : "";
+  $("#sentTo").classList.toggle("hidden", !sent);
+  $("#result").classList.toggle("compact", sent);
+  $("#shortBox").classList.toggle("hidden", sent);
   $("#codeOut").textContent = d.code;
   $("#shortOut").textContent = host + "/" + d.code;
   $("#result").classList.remove("hidden");
+  // 코드만 만든 경우에도 연결된 칠판으로 바로 보낼 수 있게
+  const rs = $("#resend"); rs.innerHTML = "";
+  if (!sent) for (const r of rooms) {
+    const b = Object.assign(document.createElement("button"), { className:"chip", textContent:`${r.name}에 띄우기` });
+    b.onclick = async () => {
+      b.disabled = true;
+      try { const x = await api("/api/create", { code: d.code, room: r.id }); showCode({ ...d, sentTo: x.sentTo }); }
+      catch (e) { if (e.roomGone) removeRoom(r.id); setMsg($("#sendMsg"), e.message, "err"); b.disabled = false; }
+    };
+    rs.appendChild(b);
+  }
   clearInterval(timerId);
+  if (!d.expiresIn) return;
   const end = Date.now() + d.expiresIn * 1000;
   const tick = () => {
     const left = Math.max(0, Math.round((end - Date.now()) / 1000));
-    $("#timer").textContent = left ? `${Math.floor(left/60)}분 ${String(left%60).padStart(2,"0")}초 남음` : "만료되었습니다";
+    $("#timer").textContent = left ? `코드 ${Math.floor(left/60)}분 ${String(left%60).padStart(2,"0")}초 남음` : "코드가 만료되었습니다";
     if (!left) clearInterval(timerId);
   };
   tick(); timerId = setInterval(tick, 1000);
 }
 async function createCode(payload){
-  const r = await fetch("/api/create", {
-    method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(payload)
-  });
-  const d = await r.json();
-  if (!r.ok) throw new Error(d.error);
-  return d;
+  try {
+    return await api("/api/create", dest ? { ...payload, room: dest } : payload);
+  } catch (e) {
+    if (e.roomGone) { removeRoom(dest); }
+    throw e;
+  }
 }
 
 /* ---------- 보내기: 링크 ---------- */
@@ -311,7 +504,7 @@ async function makeLinkCode(raw){
   const url = extractUrl(raw);
   if (!url) return setMsg($("#sendMsg"), "링크를 넣어 주세요", "err");
   $("#makeBtn").disabled = true;
-  setMsg($("#sendMsg"), "만드는 중…");
+  setMsg($("#sendMsg"), dest ? "칠판으로 보내는 중…" : "만드는 중…");
   try { showCode(await createCode({url})); }
   catch (e) { setMsg($("#sendMsg"), e.message || "실패했습니다", "err"); }
   finally { $("#makeBtn").disabled = false; }
@@ -356,7 +549,7 @@ async function sendFile(file){
     }}));
   } catch (e) {
     let msg = e.message || "올리기에 실패했습니다";
-    try { // 같은 요청을 다시 보내 서버가 알려주는 실제 원인을 표시
+    if (/presigned|Vercel Blob/i.test(msg)) try { // 서버가 알려주는 실제 원인을 표시
       const r = await fetch("/api/upload", { method: "POST", headers: {"content-type":"application/json"},
         body: JSON.stringify({ type: "blob.generate-presigned-url",
           payload: { pathname: lastPath, clientPayload: null, multipart: file.size > 20 * 1024 * 1024 } }) });
@@ -371,10 +564,176 @@ async function sendFile(file){
   }
 }
 
+/* ================= 칠판 대기 모드 ================= */
+const W = {
+  room: store.get("lc_board", null),   // { id, name } — 이 칠판의 등록 정보
+  seen: store.get("lc_seen", 0),       // 마지막으로 연 항목 번호
+  timer: null, lastActive: Date.now(), first: true, pairTimer: null, wake: null,
+};
+function wPanel(which){
+  for (const id of ["wSetup","wIdle","wShow"]) $("#" + id).classList.toggle("hidden", id !== which);
+  $("#wTools").classList.toggle("hidden", which === "wSetup");
+}
+function toast(text, ms = 1800){
+  const t = Object.assign(document.createElement("div"), { className:"toast", textContent:text });
+  document.body.appendChild(t); setTimeout(() => t.remove(), ms);
+}
+
+function startWait(){
+  $("#main").classList.add("hidden");
+  $("#wait").classList.remove("hidden");
+  document.title = "링크코드 · 칠판 대기";
+  if (!W.room) { wPanel("wSetup"); $("#wNameInput").focus(); return; }
+  $("#wName").textContent = W.room.name;
+  wPanel("wIdle");
+  keepAwake();
+  poll();
+}
+
+$("#wCreateBtn").onclick = async () => {
+  setMsg($("#wSetupMsg"), "준비 중…");
+  try {
+    const d = await api("/api/room", { action: "create", name: $("#wNameInput").value });
+    W.room = { id: d.roomId, name: d.name }; store.set("lc_board", W.room);
+    W.seen = Date.now(); store.set("lc_seen", W.seen);
+    setMsg($("#wSetupMsg"), "");
+    startWait();
+    startPair(); // 처음엔 바로 연결번호를 보여줌
+  } catch (e) { setMsg($("#wSetupMsg"), e.message, "err"); }
+};
+$("#wNameInput").addEventListener("keydown", e => { if (e.key === "Enter") $("#wCreateBtn").click(); });
+
+/* 폰 연결번호 */
+async function startPair(){
+  try {
+    const d = await api("/api/room", { action: "pair-start", roomId: W.room.id });
+    wPanel("wIdle");
+    $("#wPairCode").textContent = d.code;
+    $("#wPairBox").classList.remove("hidden");
+    const end = Date.now() + d.expiresIn * 1000;
+    clearInterval(W.pairTimer);
+    const tick = () => {
+      const left = Math.max(0, Math.round((end - Date.now()) / 1000));
+      $("#wPairLeft").textContent = `${Math.floor(left/60)}:${String(left%60).padStart(2,"0")} 동안 유효`;
+      if (!left) { clearInterval(W.pairTimer); $("#wPairBox").classList.add("hidden"); }
+    };
+    tick(); W.pairTimer = setInterval(tick, 1000);
+  } catch (e) {
+    if (/찾을 수 없/.test(e.message)) return resetBoard(false);
+    toast(e.message);
+  }
+}
+$("#wPairBtn").onclick = () => {
+  if (!$("#wPairBox").classList.contains("hidden") && !$("#wIdle").classList.contains("hidden")) {
+    clearInterval(W.pairTimer); $("#wPairBox").classList.add("hidden"); return;
+  }
+  startPair();
+};
+$("#wFullBtn").onclick = () => {
+  if (document.fullscreenElement) document.exitFullscreen?.();
+  else document.documentElement.requestFullscreen?.().catch(()=>{});
+  keepAwake();
+};
+$("#wExitBtn").onclick = () => { location.href = "/"; };
+$("#wRename").onclick = async () => {
+  const name = prompt("칠판 이름", W.room?.name || "");
+  if (!name) return;
+  try {
+    const d = await api("/api/room", { action: "rename", roomId: W.room.id, name });
+    W.room.name = d.name; store.set("lc_board", W.room); $("#wName").textContent = d.name;
+    toast("이름을 바꿨습니다. 폰에는 다시 연결하면 반영됩니다.", 3000);
+  } catch (e) { toast(e.message); }
+};
+$("#wReset").onclick = () => {
+  if (confirm("연결을 초기화할까요? 지금까지 연결된 폰들은 이 칠판으로 보낼 수 없게 되고, 다시 연결해야 합니다.")) resetBoard(true);
+};
+function resetBoard(ask){
+  W.room = null; store.del("lc_board");
+  clearTimeout(W.timer);
+  if (!ask) toast("칠판 정보가 만료되어 새로 등록합니다", 3000);
+  startWait();
+}
+
+/* 화면 꺼짐 방지 (지원하는 브라우저에서) */
+async function keepAwake(){
+  try { if ("wakeLock" in navigator && !W.wake) { W.wake = await navigator.wakeLock.request("screen"); W.wake.addEventListener("release", () => W.wake = null); } } catch {}
+}
+
+/* 새 항목 확인: 평소 3초, 오래 조용하면 점점 느리게 (서버 사용량 절약) */
+function pollDelay(){
+  const idle = Date.now() - W.lastActive;
+  if (idle > 2 * 3600e3) return 30000;
+  if (idle > 20 * 60e3) return 10000;
+  return 3000;
+}
+function schedule(){
+  clearTimeout(W.timer);
+  const d = pollDelay();
+  $("#wPulse").classList.toggle("slow", d > 3000);
+  W.timer = setTimeout(poll, d);
+}
+async function poll(){
+  if (!W.room) return;
+  if (document.hidden) return schedule();
+  try {
+    const d = await api("/api/room?id=" + encodeURIComponent(W.room.id));
+    $("#wDot").classList.remove("off");
+    $("#wStatus").textContent = pollDelay() > 3000 ? "절전 대기 중 · 화면을 누르면 빠르게 확인합니다" : "연결됨 · 폰에서 보내면 바로 열립니다";
+    if (d.seq && d.seq > W.seen) {
+      const fresh = Date.now() - d.seq < 10 * 60e3;   // 대기 화면을 켜기 전에 보낸 오래된 것은 열지 않음
+      W.seen = d.seq; store.set("lc_seen", W.seen);
+      if (fresh || !W.first) { W.lastActive = Date.now(); W.first = false; return openOnBoard(d.entry); }
+    }
+    W.first = false;
+  } catch (e) {
+    $("#wDot").classList.add("off");
+    $("#wStatus").textContent = "연결이 끊겼습니다 · 다시 시도하는 중…";
+  }
+  schedule();
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden && W.room && !$("#wait").classList.contains("hidden")) { W.lastActive = Date.now(); poll(); keepAwake(); } });
+$("#wait").addEventListener("pointerdown", () => {
+  const wasSlow = pollDelay() > 3000;
+  W.lastActive = Date.now();
+  if (wasSlow && W.room) poll();
+});
+window.addEventListener("pageshow", e => { if (e.persisted && W.room && !$("#wait").classList.contains("hidden")) { wPanel("wIdle"); poll(); } });
+
+/* 받은 것을 칠판에 띄우기 */
+function openOnBoard(entry){
+  clearInterval(W.pairTimer); $("#wPairBox").classList.add("hidden");
+  if (entry.type === "link") { toast("링크를 엽니다 · 다 보면 '뒤로'를 누르세요", 1500); return setTimeout(() => location.href = entry.url, 600); }
+  const type = entry.contentType || "";
+  if (OFFICE.test(entry.name)) { toast(`${entry.name} 여는 중…`, 1500); return setTimeout(() => location.href = officeViewer(entry.url), 600); }
+  if (isPdf(entry)) { toast(`${entry.name} 여는 중…`, 1500); return setTimeout(() => location.href = entry.url, 600); }
+
+  // 사진·영상·기타는 대기 화면 안에서 바로 보여주고, 다음 것이 오면 자동 교체
+  const media = $("#wMedia"), acts = $("#wShowActs");
+  media.innerHTML = ""; acts.innerHTML = "";
+  $("#wShowName").textContent = entry.name;
+  const mk = (label, onclick, main) => { const b = Object.assign(document.createElement("button"), { textContent:label, onclick, className: main ? "main" : "" }); acts.appendChild(b); };
+  if (type.startsWith("image/")) {
+    media.appendChild(Object.assign(document.createElement("img"), { src: entry.url, alt: entry.name }));
+  } else if (type.startsWith("video/")) {
+    const v = Object.assign(document.createElement("video"), { src: entry.url, controls: true, playsInline: true, autoplay: true });
+    media.appendChild(v);
+    v.play().catch(() => { v.muted = true; v.play().catch(()=>{}); });
+  } else {
+    media.innerHTML = `<div style="color:#fff;font-size:22px;padding:30px;text-align:center">미리 볼 수 없는 파일입니다</div>`;
+    mk("내려받기", () => location.href = entry.downloadUrl, true);
+  }
+  mk("대기 화면으로", () => { media.innerHTML = ""; wPanel("wIdle"); });
+  wPanel("wShow");
+  schedule();
+}
+
 /* ---------- 시작 화면 결정 ---------- */
 const q = new URLSearchParams(location.search);
 const shared = q.get("url") || q.get("text") || q.get("title"); // 폰 '공유' 메뉴로 링크가 들어온 경우
-if (q.get("share") === "file") {
+renderChips();
+if (location.pathname === "/wait") {
+  startWait();
+} else if (q.get("share") === "file") {
   history.replaceState(null, "", "/");
   try {
     const cache = await caches.open("linkcode-share");
@@ -397,8 +756,8 @@ if (q.get("share") === "file") {
 } else if (q.get("notfound")) {
   setMsg($("#recvMsg"), "없거나 만료된 코드입니다", "err");
   history.replaceState(null, "", "/");
-} else if (matchMedia("(pointer:coarse)").matches && innerWidth < 700) {
-  show("send"); // 작은 터치 화면(폰)은 보내기부터
+} else if ((matchMedia("(pointer:coarse)").matches && innerWidth < 700) || rooms.length) {
+  show("send"); // 폰(작은 터치 화면)이나 칠판을 연결해 둔 기기는 보내기부터
 }
 render();
 
