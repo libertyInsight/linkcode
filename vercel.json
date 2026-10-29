@@ -1,0 +1,11 @@
+{
+  "rewrites": [
+    { "source": "/:code(\\d{6})", "destination": "/api/open?code=:code&go=1" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    }
+  ]
+}

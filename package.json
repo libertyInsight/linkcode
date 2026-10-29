@@ -1,0 +1,6 @@
+{
+  "name": "linkcode",
+  "private": true,
+  "type": "module",
+  "description": "긴 링크를 6자리 숫자 코드로 바꿔 다른 기기에서 바로 여는 앱 (로그인 없음)"
+}
