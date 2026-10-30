@@ -1,4 +1,4 @@
-import { saveEntry, getEntry, TTL_SECONDS, getRoom, pushToRoom, isRoomId } from "../lib/store.js";
+import { saveEntry, getEntry, TTL_SECONDS, getSession, pushToRoom } from "../lib/store.js";
 
 const BLOB_HOST = ".blob.vercel-storage.com";
 
@@ -13,24 +13,25 @@ function cleanLink(raw) {
 
 // POST { url }                → 링크 코드
 // POST { file: {...} }        → 파일 코드
-// POST { ..., room: 칠판ID }  → 코드를 만들고 그 칠판에도 바로 띄움
-// POST { code, room }         → 이미 만든 코드를 칠판에 다시 띄움
+// POST { ..., session }       → 코드를 만들고 이번 수업에 연결된 칠판에도 바로 띄움
+// POST { code, session }      → 이미 만든 코드를 칠판에 띄움
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "POST만 가능합니다." });
   const body = req.body || {};
 
   try {
-    let room = null;
-    if (body.room) {
-      room = isRoomId(body.room) ? await getRoom(body.room) : null;
-      if (!room) return res.status(404).json({ error: "연결된 칠판을 찾을 수 없습니다. 칠판에서 다시 연결해 주세요.", roomGone: true });
+    let sess = null;
+    if (body.session) {
+      sess = await getSession(body.session);
+      if (!sess) return res.status(410).json({ error: "칠판 연결이 끝났습니다 (수업 종료 또는 1시간 경과). 칠판의 QR을 다시 찍어 주세요.", sessionGone: true });
     }
+    const room = sess && sess.room;
+    const push = (code, entry) => pushToRoom(sess.roomId, code, entry, room.epoch || 0);
 
-    // 이미 있는 코드를 칠판으로 다시 보내기
-    if (body.code && room) {
+    if (body.code && sess) {
       const entry = await getEntry(String(body.code));
       if (!entry) return res.status(404).json({ error: "없거나 만료된 코드입니다." });
-      await pushToRoom(body.room, String(body.code), entry);
+      await push(String(body.code), entry);
       return res.status(200).json({ code: String(body.code), sentTo: room.name });
     }
 
@@ -56,7 +57,7 @@ export default async function handler(req, res) {
     }
 
     const code = await saveEntry(entry);
-    if (room) await pushToRoom(body.room, code, entry);
+    if (sess) await push(code, entry);
     res.status(200).json({ code, expiresIn: TTL_SECONDS, sentTo: room ? room.name : undefined });
   } catch (e) {
     res.status(500).json({ error: e.message });
